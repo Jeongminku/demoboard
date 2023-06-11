@@ -46,14 +46,10 @@
         
         <!-- 페이징 -->
         <div class="pagination" style="text-align:center; font-size:17px" >
-            <!-- <a th:if="${currentPage > 1}" th:href="@{/board/openBoardList.do(page=${currentPage - 1})}">&lt; 이전</a> -->
 			<a th:if="${currentPage > 1 || (currentPage != 1 && keyword != null && !keyword.isEmpty() && list.size() > 0)}" th:href="@{/board/openBoardList.do(page=${currentPage - 1}, keyword=${keyword})}">&lt; 이전</a>
 			
-            <!-- <a th:each="pageNum : ${pageNumbers}" th:href="@{/board/openBoardList.do(page=${pageNum})}"
-               th:class="${pageNum == currentPage} ? 'active' : ''" th:text="${pageNum}"></a> -->
-            <a th:each="pageNum : ${pageNumbers}" th:href="@{${keyword != null && !keyword.isEmpty()} ? '/board/openBoardList.do?page=' + ${pageNum} + '&keyword=' + ${keyword} : '/board/openBoardList.do?page=' + ${pageNum}}"
-       th:class="${pageNum == currentPage} ? 'active' : ''" th:text="${pageNum}" th:style="${pageNum == currentPage} ? 'font-size:30px' : ''"></a>
-            <!-- <a th:if="${currentPage < totalPages}" th:href="@{/board/openBoardList.do(page=${currentPage + 1})}">다음 &gt;</a> -->
+
+            <a th:each="pageNum : ${pageNumbers}" th:href="@{${keyword != null && !keyword.isEmpty()} ? '/board/openBoardList.do?page=' + ${pageNum} + '&keyword=' + ${keyword} : '/board/openBoardList.do?page=' + ${pageNum}}" th:text="${pageNum}" th:style="${pageNum == currentPage} ? 'font-size:30px' : ''"></a>
 			<a th:if="${currentPage < totalPages && keyword != null && !keyword.isEmpty()}" th:href="@{/board/openBoardList.do(page=${currentPage + 1}, keyword=${keyword})}">다음 &gt;</a>
     		<a th:if="${currentPage < totalPages && (keyword == null || keyword.isEmpty())}" th:href="@{/board/openBoardList.do(page=${currentPage + 1})}">다음 &gt;</a>     
         </div>

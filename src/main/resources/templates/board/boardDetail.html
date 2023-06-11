@@ -49,8 +49,6 @@
 
 		<div class="file_list" th:each="list : ${board.fileList}">
 			
-		<!-- <a th:each="list : ${board.fileList}" th:text="|${list.originalFileName}(${list.fileSize} kb)|"></a> -->
-		<!-- <a th:each="list : ${board.fileList}" th:href="@{/board/downloadBoardFile.do(fileIndex=${list.fileIndex}, boardIndex=${list.boardIndex})}" th:text="|${list.originalFileName}(${list.fileSize} kb)|"></a> -->			
 		<a style="float:left" th:href="@{/board/downloadBoardFile.do(fileIndex=${list.fileIndex}, boardIndex=${list.boardIndex})}" th:text="|${list.originalFileName}(${list.fileSize} kb)|"></a>
 		<input type="button" id="delete_file" th:value="'파일 삭제'" th:onclick="|location.href='@{/board/deleteBoardFile.do(fileIndex=${list.FileIndex}, boardIndex=${list.boardIndex})}'|">
 		[[${list}]]
