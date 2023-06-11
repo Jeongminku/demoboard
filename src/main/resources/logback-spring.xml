@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <!-- appender : 로그를 어디에 출력할지 결정함.(콘솔,파일기록,DB저장 등등) -->
+    <!-- encoder  : 출력될 로그의 형식-->
+    
+    
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d %5p [%c] %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="console-infolog" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d %5p %m%n</Pattern>
+        </encoder>
+    </appender>
+
+    <!-- logger   : 로그를 출력하는 요소, level속성으로 조절할수있으며 appender에 전달함. debug레벨의 로그를 출력하는 형식은 appender-ref속성에 적힌 "console"이라는 이름을 가진 appender를 사용함.  -->
+    <!-- 
+    	trace : 모든 로그                  										출력방법  log.trace("trace level log");
+    	debug : 디버그 용																	log.debug("debug level log");
+    	info  : 상태변경 등의 정보성 메시지													log.info("info level log");
+    	warn  : 당장의 실행에는 문제 X , But 시스템 에러의 원인이 될 수 있는 경고성 메시지 출력			log.warn("warm level log");
+    	error : 요청 처리중 문제 발생															log.error("error level log");
+     -->
+    <!-- 로거 -->
+    <logger name="board" level="DEBUG" appender-ref="console"/>
+
+	<!-- 
+	jdbc.sqlonly	: SQL을 보여줌. Prepared statement의 경우 관련 파라미터는 자동으로 변경되어 출력.
+	jdbc.sqltiming  : SQL문 & SQL문의 실행시간을 밀리초 단위로 보여줌.
+	jdbc.audit		: ResultSets을 제외한 모든 JDBC호출 정보를 보여줌 // 매우 많은 로그가 발생하므로 JDBC관련 문제추적을 위한게 아니라면 사용하지 않는것이 일반적.
+	jdbc.resultset  : ResultSets까지 포함한 모든 JDBC호출 정보를 보여주므로 audit보다 더 많은 로그 발생.
+	jdbc.resulttable: SQL의 조회 결과를 테이블로 보여줌.
+	jdbc.connection : Connection의 연결과 종료에 관련된 로그를 보여줌. Connection 누수(leak)를 해결하는 데 도움이 된다고 함.
+	 -->>
+	<logger name="jdbc.sqlonly" level="INFO" appender-ref="console-infolog"></logger>
+	<logger name="jdbc.resultsettable" level="INFO" appender-ref="console-infolog"></logger>
+
+
+    <!-- 루트 로거 -->
+    <root level="off">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>

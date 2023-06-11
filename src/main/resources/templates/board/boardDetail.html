@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>board</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+	<div class="container">
+		<h2>게시글 상세 화면</h2>
+		<form id="frm" method="post">
+	    	<table class="board_detail">
+				<colgroup>
+					<col width="15%"/>
+					<col width="35%"/>
+					<col width="15%"/>
+					<col width="35%"/>
+				</colgroup>
+				<caption>게시글 상세내용</caption>
+				<tbody>
+					<tr>
+						<th scope="row">글 번호</th>
+						<td th:text="${board.boardIndex}"></td>
+						<th scope="row">조회수</th>
+						<td th:text="${board.hitCount}"></td>
+					</tr>
+					<tr>
+						<th scope="row">작성자</th>
+						<td th:text="${board.creatorId}"></td>
+						<th scope="row">작성일</th>
+						<td th:text="${#temporals.format(board.createdDatetime, 'yyyy-MM-dd HH:mm')}"></td>
+					</tr>
+					<tr>
+						<th scope="row">제목</th>
+						<td colspan="3">
+							<input type="text" id="title" name="title" th:value="${board.title}"/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4" class="view_text">
+							<textarea title="내용" id="contents" name="contents" 
+								th:text="${board.contents}"></textarea>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+            <input type="hidden" name="boardIndex" th:value="${board.boardIndex}">
+        </form>
+
+		<div class="file_list" th:each="list : ${board.fileList}">
+			
+		<!-- <a th:each="list : ${board.fileList}" th:text="|${list.originalFileName}(${list.fileSize} kb)|"></a> -->
+		<!-- <a th:each="list : ${board.fileList}" th:href="@{/board/downloadBoardFile.do(fileIndex=${list.fileIndex}, boardIndex=${list.boardIndex})}" th:text="|${list.originalFileName}(${list.fileSize} kb)|"></a> -->			
+		<a style="float:left" th:href="@{/board/downloadBoardFile.do(fileIndex=${list.fileIndex}, boardIndex=${list.boardIndex})}" th:text="|${list.originalFileName}(${list.fileSize} kb)|"></a>
+		<input type="button" id="delete_file" th:value="'파일 삭제'" th:onclick="|location.href='@{/board/deleteBoardFile.do(fileIndex=${list.FileIndex}, boardIndex=${list.boardIndex})}'|">
+		[[${list}]]
+		</div>
+		<div th:if="${message}" class="alert alert-success">
+			<p th:text="${message}"></p>
+		</div>
+	        <input type="button" id="list" th:attr="page=${currentPage}, keyword=${keyword}"  value="목록으로">
+	        <input type="button" id="edit" value="수정하기">
+	        <input type="button" id="delete" value="삭제하기">
+	
+	        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	        <script type="text/javascript">
+	            $(document).ready(function(){
+	                $("#list").on("click", function(){
+	                    //location.href = "openBoardList.do";
+	                	var page = $(this).attr("page");
+	                	var keyword = $(this).attr("keyword") || "";
+
+	                	var url ="/board/openBoardList.do?page="+page;
+	                	
+	                	if(keyword !== null || keyword !== "") {
+	                		url +="&keyword="+encodeURIComponent(keyword);
+	                	}
+	                	window.location.href = url;
+	                });
+	
+
+	
+	                $("#delete").on("click", function(){
+	                	$("#frm").attr("action","deleteBoard.do");
+	                    $("#frm").submit();
+	                });
+	            })
+	            
+	        	$(function(){
+	        		$("#edit").on("click", function(){
+	        			$.ajax({
+	        				url: "/board/updateBoard.do",
+	        				type: "POST",
+	        				data: $("#frm").serialize(),
+	        				success: function(data) {
+	        					alert(data);
+	        					location.reload();
+	        				},
+	        				error: function(xhr, status, error) {
+	        					console.log(error);
+	        				}
+	        			});
+	        		});
+	        	});
+	            
+	            
+	        </script>
+	</div>
+</body>
+</html>

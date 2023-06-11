@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>board</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> 
+</head>
+<body>
+    <div class="container">
+        <h2>게시글 목록</h2>
+        
+        <form action="/board/openBoardList.do" method="get">
+        	<input type="text" name="keyword" placeholder="검색어 입력">
+        	<button type="submit">검색</button>
+        </form>
+        
+        <table class="board_list">
+            <colgroup>
+                <col width="15%"/>
+                <col width="*"/>
+                <col width="15%"/>
+                <col width="20%"/>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th scope="col">글번호</th>
+                    <th scope="col">제목</th>
+                    <th scope="col">작성일</th>
+                    <th scope="col">조회수</th>
+                </tr>
+            </thead>
+            <tbody>
+            	<!-- #lists.size(arrList) -->
+                <tr th:if="${#lists.size(list)} > 0" th:each="list : ${list}">
+                    <td th:text="${list.boardIndex}"></td>
+                    <td class="title"><a href="/board/openBoardDetail.do?boardIndex=" th:attrappend="href=${list.boardIndex}" th:text="${list.title}"></a></td>
+                    <td th:text="${#temporals.format(list.createdDatetime, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${list.hitCount}">
+                </tr> 
+                <tr th:unless="${#lists.size(list)} > 0">
+                    <td colspan="4">조회된 결과가 없습니다.</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- 페이징 -->
+        <div class="pagination" style="text-align:center; font-size:17px" >
+            <!-- <a th:if="${currentPage > 1}" th:href="@{/board/openBoardList.do(page=${currentPage - 1})}">&lt; 이전</a> -->
+			<a th:if="${currentPage > 1 || (currentPage != 1 && keyword != null && !keyword.isEmpty() && list.size() > 0)}" th:href="@{/board/openBoardList.do(page=${currentPage - 1}, keyword=${keyword})}">&lt; 이전</a>
+			
+            <!-- <a th:each="pageNum : ${pageNumbers}" th:href="@{/board/openBoardList.do(page=${pageNum})}"
+               th:class="${pageNum == currentPage} ? 'active' : ''" th:text="${pageNum}"></a> -->
+            <a th:each="pageNum : ${pageNumbers}" th:href="@{${keyword != null && !keyword.isEmpty()} ? '/board/openBoardList.do?page=' + ${pageNum} + '&keyword=' + ${keyword} : '/board/openBoardList.do?page=' + ${pageNum}}"
+       th:class="${pageNum == currentPage} ? 'active' : ''" th:text="${pageNum}" th:style="${pageNum == currentPage} ? 'font-size:30px' : ''"></a>
+            <!-- <a th:if="${currentPage < totalPages}" th:href="@{/board/openBoardList.do(page=${currentPage + 1})}">다음 &gt;</a> -->
+			<a th:if="${currentPage < totalPages && keyword != null && !keyword.isEmpty()}" th:href="@{/board/openBoardList.do(page=${currentPage + 1}, keyword=${keyword})}">다음 &gt;</a>
+    		<a th:if="${currentPage < totalPages && (keyword == null || keyword.isEmpty())}" th:href="@{/board/openBoardList.do(page=${currentPage + 1})}">다음 &gt;</a>     
+        </div>
+        
+        
+        <a href="/board/openBoardWrite.do" class="btn">글 쓰기</a>
+        <a href="/board/signup" class="btn">회원가입</a>
+        <a href="/board/login" class="btn" id="loginBtn">로그인</a>
+        <a href="/board/logout" class="btn" id="logoutBtn" style="display:none">로그아웃</a>
+    </div>
+<script>
+window.onload = function() {
+	var loginBtn = document.getElementById("loginBtn");
+	var logoutBtn = document.getElementById("logoutBtn");
+	
+	// 쿠키에서 세션 ID 값 가져오기
+	var sessionId = getCookie("sessionId");
+	//alert(sessionId);
+	
+	if (sessionId) {
+	    // 세션 ID가 존재하는 경우: 로그인 상태로 간주
+	    loginBtn.style.display = "none";
+	    logoutBtn.style.display = "inline";
+	  } else {
+	    // 세션 ID가 존재하지 않는 경우: 로그아웃 상태로 간주
+	    loginBtn.style.display = "inline";
+	    logoutBtn.style.display = "none";
+	  }
+	};
+	
+	// 쿠키에서 특정 이름의 값을 가져오는 함수
+	function getCookie(name) {
+	  var cookies = document.cookie.split("; ");
+	  for (var i = 0; i < cookies.length; i++) {
+	    var cookie = cookies[i].split("=");
+	    if (cookie[0] === name) {
+	      return cookie[1];
+	    }
+	  }
+	  return null;
+	};
+	
+</script>    
+</body>
+</html>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "board.mapper.BoardMapper">
+	<!-- 조회 -->
+	<select id="selectBoardList" resultType="board.board.dto.BoardDto">
+		<!--   <![CDATA [  ] ]>   -->
+		<![CDATA[
+			SELECT
+				board_index,
+				title,
+				hit_count,
+				created_datetime
+			FROM
+				board
+			WHERE
+				deleted_yn = 'N'
+			ORDER BY board_index DESC
+		]]>
+	</select>
+	
+	
+	
+	<!-- 게시글 작성 -->
+	<!-- <insert id="insertBoard" parameterType="board.board.dto.BoardDto" useGeneratedKeys="true" keyProperty="boardIndex">
+		#{title} #{contents} myBatis에서는 #{변수명}의 형식으로 전달된 데이터를 사용. 이 쿼리의 파라미터는 BoardDto의 getter 메소드를 활용하여 가져옴.  admin은 임시로 적어둠.
+		<![CDATA[ INSERT INTO board (title, contents, created_datetime, creator_id) VALUE (#{title}, #{contents}, NOW(), 'admin')]]>		
+	</insert> -->
+	
+	<insert id="insertBoard" parameterType="board.board.dto.BoardDto" useGeneratedKeys="true" keyProperty="boardIndex">
+		<!-- #{title} #{contents} myBatis에서는 #{변수명}의 형식으로 전달된 데이터를 사용. 이 쿼리의 파라미터는 BoardDto의 getter 메소드를 활용하여 가져옴.  admin은 임시로 적어둠. -->
+		<![CDATA[ INSERT INTO board (title, contents, created_datetime, creator_id) VALUE (#{title}, #{contents}, NOW(), 'admin')]]>		
+	</insert>
+	
+	<!-- 조회수 증가 -->
+	<update id="updateHitCount" parameterType="int">
+		<![CDATA[ UPDATE board SET hit_count = hit_count + 1 WHERE board_index = #{boardIndex}]]>
+	</update>
+	
+	<!-- 게시글 내용 상세조회 -->
+	<select id="selectBoardDetail" parameterType="int" resultType="board.board.dto.BoardDto">
+		<![CDATA[ SELECT board_index, title, contents, hit_count, created_datetime, creator_id FROM board WHERE board_index = ${boardIndex} AND deleted_yn = 'N']]>
+	</select>
+	
+	<!-- 게시글 업데이트 -->
+	<update id="updateBoard" parameterType="board.board.dto.BoardDto">
+		<![CDATA[ UPDATE board SET title = #{title}, contents = #{contents}, updated_datetime = NOW(), updater_id = 'admin' WHERE board_index = #{boardIndex}]]>
+	</update>
+	
+	<!-- 게시글 삭제(실제로는 update시켜서 Delete를 Y로 표현하여, 글을 조회하지 못하게 함.) -->
+	<update id="deleteBoard" parameterType="int">
+		<![CDATA[ UPDATE board SET deleted_yn = 'Y', updated_datetime = NOW(), updater_id = 'admin' WHERE board_index =#{boardIndex}]]>
+	</update>
+	
+	<!-- 파일 업로드 -->
+	<insert id="insertBoardFileList" parameterType="board.board.dto.BoardFileDto">
+	<![CDATA[ INSERT INTO file (board_index, original_file_name, stored_file_path, file_size, creator_id, created_datetime) VALUES ]]>
+		<foreach collection="list" item="item" separator=",">
+		( #{item.boardIndex}, #{item.originalFileName}, #{item.storedFilePath}, #{item.fileSize}, 'admin', NOW())
+		</foreach>
+	</insert>
+	
+	<!-- 업로드된 파일 목록 화면에서 보이기 -->
+	<select id="selectBoardFileList" parameterType="int" resultType="board.board.dto.BoardFileDto">
+	
+	<![CDATA[ SELECT file_index, board_index, original_file_name, ROUND(file_size / 1024,0) AS file_size FROM file WHERE board_index = #{boardIndex} AND deleted_yn = 'N']]>
+	
+	</select>
+	
+	<!-- 파일 다운로드를 위한 파일 정보 조회 -->
+	<select id="selectBoardFileInformation" parameterType="map" resultType="board.board.dto.BoardFileDto">
+	<![CDATA[ SELECT original_file_name, stored_file_path, file_size FROM file WHERE file_index = #{fileIndex} AND board_index = #{boardIndex} AND deleted_yn = 'N' ]]>
+	</select>
+	
+	<!-- 파일 삭제 -->
+	<update id="deleteBoardFile" parameterType="map">
+		<![CDATA[ UPDATE file SET deleted_yn = 'Y', updated_datetime = NOW(), updater_id = 'admin' WHERE file_index = #{fileIndex} AND board_index = #{boardIndex}]]>
+	</update>
+	
+	
+	<!-- 페이징처리용 게시글 전체 카운트 N만 -->
+	<select id ="getBoardCount" resultType="int">
+		<![CDATA[ SELECT COUNT(*) FROM board WHERE deleted_yn = 'N']]>
+	</select>
+	
+	<!-- 페이징처리 -->
+	<select id="selectBoardListWithPaging" parameterType="map" resultType="board.board.dto.BoardDto">
+		<![CDATA[ SELECT * FROM board WHERE deleted_yn = 'N' ORDER BY board_Index DESC LIMIT #{pageOffset}, #{pageSize}]]>
+	</select>
+	
+	
+	
+	<insert id="insertUser" parameterType="board.board.dto.UserDto">
+        <![CDATA[ INSERT INTO users (username, password) VALUES (#{username}, #{password})]]>
+    </insert>
+
+    <select id="selectCountByUsername" parameterType="String" resultType="int">
+        <![CDATA[ SELECT COUNT(*) FROM users WHERE username = #{username}]]>
+    </select>
+
+    <select id="selectUserByUsernameAndPassword" parameterType="board.board.dto.UserDto" resultType="int">
+        <![CDATA[ SELECT COUNT(*) FROM users WHERE username = #{username} AND password = #{password}]]>
+    </select>
+	
+	
+	<!-- 검색 페이징처리 -->
+	<select id="getBoardCountByKeyword" resultType="int">
+		<![CDATA[ SELECT COUNT(*) FROM board WHERE title LIKE CONCAT('%', #{keyword}, '%') AND deleted_yn = 'N']]>
+	</select>
+	
+	<select id="searchBoardByKeywordWithPaging" resultType="board.board.dto.BoardDto">
+		<![CDATA[ SELECT * FROM board WHERE title LIKE CONCAT('%', #{keyword}, '%') AND deleted_yn = 'N' ORDER BY created_datetime DESC LIMIT #{pageOffset}, #{pageSize}]]>
+	</select>
+</mapper>
